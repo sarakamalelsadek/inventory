@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Events\LowStockDetected;
 use App\Models\Stock;
 use App\Models\StockTransfer;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +56,7 @@ class StockTransferService
             $toStock->refresh();
 
             // Log the transfer
-            return StockTransfer::create([
+            $transfer = StockTransfer::create([
                 'from_warehouse_id' => $data['from_warehouse_id'],
                 'to_warehouse_id'   => $data['to_warehouse_id'],
                 'inventory_item_id' => $data['inventory_item_id'],
@@ -69,6 +70,7 @@ class StockTransferService
             if ($fromStock->quantity < $threshold) {
                 event(new LowStockDetected($fromStock));
             }
+
 
              //Flush caches for affected warehouses
             try {
